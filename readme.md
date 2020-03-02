@@ -1,5 +1,5 @@
 # EGES-PIPLINE
-implemention od Alibaba's paper: [Billion-scale Commodity Embedding for E-commerce Recommendation in Alibaba](https://arxiv.org/abs/1803.02349)
+implemention of Alibaba's paper: [Billion-scale Commodity Embedding for E-commerce Recommendation in Alibaba](https://arxiv.org/abs/1803.02349)
 
 一个EGES的pipeline简单实现，包括以下部分：
 * 数据获取：使用[jdata2019](https://wx.jdcloud.com/market/jdata/list/17)比赛中的行为数据（10000条），及商品数据。
