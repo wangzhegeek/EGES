@@ -44,7 +44,6 @@ if __name__  == '__main__':
     #     side_infos = pickle.load(f)
     with open('./data_cache/side_info', 'rb') as f:
         side_info_dict = pickle.load(f)
-    side_info_dict[0] = (0, 0, 0)
 
     # brand_list, shop_list, cate_list = side_infos
     session_items = []

@@ -23,6 +23,7 @@ implemention of Alibaba's paper: [Billion-scale Commodity Embedding for E-commer
 
 ## baseline示例：
 ```
+python data_process.py
 python EGES.py
 ```
 

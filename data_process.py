@@ -7,7 +7,6 @@ import time
 import networkx as nx
 from node2vec import Node2Vec
 
-
 def cnt_session(data, time_cut=30, cut_type=2):
     sku_list = data['sku_id']
     time_list = data['action_time']
@@ -59,7 +58,6 @@ if __name__ == '__main__':
             else:
                 node_pair[(session[i-1], session[i])] += 1
 
-    # add item attribute
     in_node_list = list(map(lambda x: x[0], list(node_pair.keys())))
     out_node_list = list(map(lambda x: x[1], list(node_pair.keys())))
     weight_list = list(node_pair.values())
@@ -73,22 +71,38 @@ if __name__ == '__main__':
     session_reproduce = model.get_sentences()
     session_reproduce = list(filter(lambda x: len(x) > 2, session_reproduce))
 
-    with open('./data_cache/session_reproduce', 'wb') as f:
-        pickle.dump(session_reproduce, f)
-
     # add side info
     product_data = pd.read_csv(data_path + 'jdata_product.csv').drop('market_time', axis=1).dropna()
 
     all_skus = set()
-    for tmp_lst in session_reproduce:
-        for item in tmp_lst:
+    for session in session_reproduce:
+        for item in session:
             all_skus.add(int(item))
-
     all_nodes_df = pd.DataFrame({'sku_id': list(all_skus)})
     all_nodes_df = pd.merge(all_nodes_df, product_data, on='sku_id', how='left').fillna(0)
     all_nodes_df[all_nodes_df.columns] = all_nodes_df[all_nodes_df.columns].astype(int)
 
-    side_info_dict = dict(map(lambda x: (x[0], (x[1], x[2], x[3])), all_nodes_df.to_numpy().tolist()))
+    # id2index
+    sku_dict = dict(enumerate(item for item in all_nodes_df['sku_id'].unique()))
+    sku_dict = {v: k for k, v in sku_dict.items()}
+    brand_dict = dict(enumerate(item for item in all_nodes_df['brand'].unique()))
+    brand_dict = {v: k for k, v in brand_dict.items()}
+    shop_dict = dict(enumerate(item for item in all_nodes_df['shop_id'].unique()))
+    shop_dict = {v: k for k, v in shop_dict.items()}
+    cate_dict = dict(enumerate(item for item in all_nodes_df['cate'].unique()))
+    cate_dict = {v: k for k, v in cate_dict.items()}
+
+    side_info_dict = dict(map(lambda x: (sku_dict[x[0]], (brand_dict[x[1]], shop_dict[x[2]], cate_dict[x[3]])), all_nodes_df.to_numpy()))
+
+    session_reproduce2 = []
+    for session in session_reproduce:
+        tmp_lst = []
+        for item in session:
+            tmp_lst.append(sku_dict[int(item)])
+        session_reproduce2.append(tmp_lst)
+
+    with open('./data_cache/session_reproduce', 'wb') as f:
+        pickle.dump(session_reproduce2, f)
 
     with open('./data_cache/side_info', 'wb') as f:
         pickle.dump(side_info_dict, f)
