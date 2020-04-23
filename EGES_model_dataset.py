@@ -47,12 +47,11 @@ class EGES_Model:
         return merge_emb
 
     def make_skipgram_loss(self):
-        loss = tf.reduce_sum(tf.nn.sampled_softmax_loss(
+        loss = tf.reduce_mean(tf.nn.sampled_softmax_loss(
             weights=self.softmax_w,
             biases=self.softmax_b,
-            labels=self.batch_labels,
+            labels=self.inputs[-1],
             inputs=self.merge_emb,
             num_sampled=self.n_samped,
-            num_classes=self.num_samples))
-        cost = tf.reduce_mean(loss)
-        return cost
+            num_classes=self.num_nodes))
+        return loss
