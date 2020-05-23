@@ -12,7 +12,7 @@ def create_alias_table(area_ratio):
     small, large = [], []
 
     for i, prob in enumerate(area_ratio):
-        if prob < 1.0:
+        if prob*l < 1.0:
             small.append(i)
         else:
             large.append(i)
