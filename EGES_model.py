@@ -58,5 +58,14 @@ class EGES_Model:
             labels=self.inputs[-1],
             inputs=self.merge_emb,
             num_sampled=self.n_samped,
-            num_classes=self.num_nodes))
+            num_classes=self.num_nodes,
+            num_true=1,
+            sampled_values=tf.random.uniform_candidate_sampler(
+                true_classes=tf.cast(self.inputs[-1], tf.int64), 
+                num_true=1, 
+                num_sampled=self.n_samped, 
+                unique=True, 
+                range_max=self.num_nodes
+            )
+        ))
         return loss

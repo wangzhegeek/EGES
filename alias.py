@@ -8,6 +8,7 @@ def create_alias_table(area_ratio):
     :return: accept,alias
     """
     l = len(area_ratio)
+    area_ratio = [prop * l for prop in area_ratio]
     accept, alias = [0] * l, [0] * l
     small, large = [], []
 
