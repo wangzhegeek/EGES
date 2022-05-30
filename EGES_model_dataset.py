@@ -50,7 +50,7 @@ class EGES_Model:
         loss = tf.reduce_mean(tf.nn.sampled_softmax_loss(
             weights=self.softmax_w,
             biases=self.softmax_b,
-            labels=self.inputs[-1],
+            labels=self. batch_labels,
             inputs=self.merge_emb,
             num_sampled=self.n_samped,
             num_classes=self.num_nodes))
