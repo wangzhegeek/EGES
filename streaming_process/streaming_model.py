@@ -23,8 +23,8 @@ class StreamingEGES(nn.Module):
         参数:
         num_nodes: 初始节点数量
         embedding_dim: 嵌入维度
-        side_info_dims: 侧面信息的嵌入维度列表
-        side_info_nums: 每种侧面信息的类别数量列表
+        side_info_dims: sideinfo的嵌入维度列表
+        side_info_nums: 每种sideinfo的类别数量列表
         use_attention: 是否使用注意力机制
         device: 计算设备
         """
@@ -39,7 +39,7 @@ class StreamingEGES(nn.Module):
         self.node_embeddings = nn.Embedding(num_nodes, embedding_dim)
         nn.init.normal_(self.node_embeddings.weight, mean=0, std=0.01)
         
-        # 侧面信息嵌入
+        # sideinfo嵌入
         self.side_info_dims = side_info_dims if side_info_dims else []
         self.side_info_nums = side_info_nums if side_info_nums else []
         self.side_embeddings = nn.ModuleList()
@@ -51,7 +51,7 @@ class StreamingEGES(nn.Module):
         
         # 注意力网络
         if use_attention:
-            # 注意力权重，包括节点嵌入和所有侧面信息
+            # 注意力权重，包括节点嵌入和所有sideinfo
             self.attention = nn.Linear(1, 1 + len(self.side_info_dims))
             nn.init.xavier_uniform_(self.attention.weight)
         
@@ -60,12 +60,12 @@ class StreamingEGES(nn.Module):
         self.reverse_node_map = {}
         self.next_node_idx = 0
         
-        # 侧面信息映射
+        # sideinfo映射
         self.side_info_maps = [defaultdict(int) for _ in range(len(self.side_info_dims))]
         self.side_info_reverse_maps = [{} for _ in range(len(self.side_info_dims))]
         self.side_info_next_idx = [1 for _ in range(len(self.side_info_dims))]  # 从1开始，0留给未知
         
-        # 节点侧面信息缓存
+        # 节点sideinfo缓存
         self.node_side_info = {}
         
         # 优化器
@@ -138,7 +138,7 @@ class StreamingEGES(nn.Module):
         print(f"扩展节点嵌入容量: {old_num_nodes} -> {self.num_nodes}")
     
     def _expand_side_embeddings(self, side_idx):
-        """扩展侧面信息嵌入容量"""
+        """扩展sideinfo嵌入容量"""
         old_num = self.side_info_nums[side_idx]
         self.side_info_nums[side_idx] = max(1, int(old_num * 1.5))  # 增加50%容量
         
@@ -154,24 +154,24 @@ class StreamingEGES(nn.Module):
         # 替换嵌入层
         self.side_embeddings[side_idx] = new_embeddings.to(self.device)
         
-        print(f"扩展侧面信息{side_idx}嵌入容量: {old_num} -> {self.side_info_nums[side_idx]}")
+        print(f"扩展sideinfo{side_idx}嵌入容量: {old_num} -> {self.side_info_nums[side_idx]}")
     
     def update_side_info(self, node_id, side_info_list):
         """
-        更新节点的侧面信息
+        更新节点的sideinfo
         
         参数:
         node_id: 节点ID
-        side_info_list: 侧面信息列表，每个元素对应一种侧面信息
+        side_info_list: sideinfo列表，每个元素对应一种sideinfo
         """
-        # 确保侧面信息列表长度正确
+        # 确保sideinfo列表长度正确
         if len(side_info_list) != len(self.side_info_dims):
             side_info_list = side_info_list + [None] * (len(self.side_info_dims) - len(side_info_list))
         
         # 获取节点索引
         node_idx = self._get_node_idx(node_id)
         
-        # 获取侧面信息索引
+        # 获取sideinfo索引
         side_indices = []
         for i, value in enumerate(side_info_list):
             if value is not None:
@@ -180,7 +180,7 @@ class StreamingEGES(nn.Module):
                 idx = 0  # 未知类别
             side_indices.append(idx)
         
-        # 更新节点侧面信息缓存
+        # 更新节点sideinfo缓存
         self.node_side_info[node_id] = side_indices
     
     def get_node_embedding(self, node_id):
@@ -200,18 +200,18 @@ class StreamingEGES(nn.Module):
         # 获取节点嵌入
         node_emb = self.node_embeddings(torch.tensor([node_idx], device=self.device))
         
-        # 如果没有侧面信息或不使用注意力，直接返回节点嵌入
+        # 如果没有sideinfo或不使用注意力，直接返回节点嵌入
         if not self.use_attention or node_id not in self.node_side_info:
             return node_emb.squeeze(0)
         
-        # 获取侧面信息嵌入
+        # 获取sideinfo嵌入
         side_indices = self.node_side_info[node_id]
         side_embs = []
         
         for i, idx in enumerate(side_indices):
             if i < len(self.side_embeddings):
                 side_emb = self.side_embeddings[i](torch.tensor([idx], device=self.device))
-                # 如果侧面信息嵌入维度与节点嵌入不同，进行线性投影
+                # 如果sideinfo嵌入维度与节点嵌入不同，进行线性投影
                 if self.side_info_dims[i] != self.embedding_dim:
                     # 简单的线性投影
                     side_emb = F.linear(
@@ -253,12 +253,12 @@ class StreamingEGES(nn.Module):
         pos_embs = self.node_embeddings(pos_neighbors)
         neg_embs = self.node_embeddings(neg_neighbors)
         
-        # 如果使用注意力机制，融合侧面信息
+        # 如果使用注意力机制，融合sideinfo
         if self.use_attention and len(self.side_embeddings) > 0:
-            # 获取侧面信息嵌入
+            # 获取sideinfo嵌入
             side_embs_list = []
             for i, side_embedding in enumerate(self.side_embeddings):
-                # 为每个节点获取对应的侧面信息索引
+                # 为每个节点获取对应的sideinfo索引
                 side_indices = torch.zeros_like(nodes)
                 for j, node_idx in enumerate(nodes.cpu().numpy()):
                     node_id = self.reverse_node_map.get(node_idx.item())
@@ -268,7 +268,7 @@ class StreamingEGES(nn.Module):
                 
                 side_embs = side_embedding(side_indices)
                 
-                # 如果侧面信息嵌入维度与节点嵌入不同，进行线性投影
+                # 如果sideinfo嵌入维度与节点嵌入不同，进行线性投影
                 if self.side_info_dims[i] != self.embedding_dim:
                     # 简单的线性投影
                     side_embs = F.linear(
@@ -460,11 +460,11 @@ class StreamingEGES(nn.Module):
     
     def add_side_info_task(self, node_id, side_info):
         """
-        添加侧面信息更新任务到更新队列
+        添加sideinfo更新任务到更新队列
         
         参数:
         node_id: 节点ID
-        side_info: 侧面信息列表
+        side_info: sideinfo列表
         """
         if self.is_updating:
             # 异步模式：添加到队列
@@ -475,7 +475,7 @@ class StreamingEGES(nn.Module):
                     'side_info': side_info
                 }, timeout=1)
             except queue.Full:
-                print("警告: 更新队列已满，跳过此侧面信息更新任务")
+                print("警告: 更新队列已满，跳过此sideinfo更新任务")
         else:
             # 同步模式：直接处理
             self.update_side_info(node_id, side_info)

@@ -91,16 +91,16 @@ def visualize_embeddings(node_embeddings, data_path, output_dir):
     
     参数:
     node_embeddings: 节点嵌入字典，键为节点ID，值为嵌入向量
-    data_path: 数据路径，用于读取SKU侧面信息
+    data_path: 数据路径，用于读取SKUsideinfo
     output_dir: 输出目录，用于保存可视化结果
     """
     print("可视化嵌入...")
     try:
-        # 准备嵌入矩阵和侧面信息矩阵
+        # 准备嵌入矩阵和sideinfo矩阵
         embebed_mat = []
         side_info_mat = []
         
-        # 读取SKU侧面信息
+        # 读取SKUsideinfo
         sku_info = pd.read_csv(data_path + 'jdata_product.csv')
         sku_info_dict = {row['sku_id']: row for _, row in sku_info.iterrows()}
         

@@ -167,7 +167,7 @@ class GraphDataset(Dataset):
         初始化数据集
         
         参数:
-        side_info: 节点侧面信息
+        side_info: 节点sideinfo
         pairs: 节点对
         node_map: 节点映射
         """
@@ -208,7 +208,7 @@ def create_dataloader(side_info, pairs, node_map, batch_size=512, num_workers=4,
     支持分布式训练
     
     参数:
-    side_info: 节点侧面信息
+    side_info: 节点sideinfo
     pairs: 节点对
     node_map: 节点映射
     batch_size: 批次大小

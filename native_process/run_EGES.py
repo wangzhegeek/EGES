@@ -84,15 +84,15 @@ def main():
     print(f"生成上下文对完成，耗时: {end_time - start_time:.2f}秒")
     print(f"生成的样本对数量: {len(all_pairs)}")
     
-    # 读取SKU侧面信息
-    print("读取SKU侧面信息...")
+    # 读取SKUsideinfo
+    print("读取SKUsideinfo...")
     start_time = time.time()
     sku_info = pd.read_csv(args.data_path + 'jdata_product.csv')
     print(f"SKU信息形状: {sku_info.shape}")
     
     # 提取特征
     side_info = sku_info[['sku_id', 'cate', 'brand', 'shop_id']].values
-    print(f"侧面信息形状: {side_info.shape}")
+    print(f"sideinfo形状: {side_info.shape}")
     
     # 创建特征长度列表
     feature_lens = []
@@ -101,7 +101,7 @@ def main():
         feature_lens.append(tmp_len)
     
     end_time = time.time()
-    print(f"读取SKU侧面信息完成，耗时: {end_time - start_time:.2f}秒")
+    print(f"读取SKUsideinfo完成，耗时: {end_time - start_time:.2f}秒")
     
     # 创建数据加载器
     dataloader = create_dataloader(

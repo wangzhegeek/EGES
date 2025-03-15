@@ -42,7 +42,7 @@ def parse_args():
     parser.add_argument('--embedding_dim', type=int, default=128,
                         help='嵌入维度')
     parser.add_argument('--side_info_dims', type=str, default='64,32,32',
-                        help='侧面信息嵌入维度，逗号分隔')
+                        help='sideinfo嵌入维度，逗号分隔')
     parser.add_argument('--initial_nodes', type=int, default=100000,
                         help='初始节点数量')
     parser.add_argument('--use_attention', action='store_true',
@@ -136,7 +136,7 @@ def load_product_data(data_path):
             logging.warning("商品数据缺少sku_id列")
             return None
     
-    # 检查侧面信息列
+    # 检查sideinfo列
     side_info_cols = ['cate', 'brand', 'shop']
     for col in side_info_cols:
         if col not in product_data.columns:
@@ -266,15 +266,15 @@ def main():
     logger.info(f"商品数据: {len(product_data)}条")
     logger.info(f"用户行为数据: {len(behavior_data)}条")
     
-    # 解析侧面信息维度
+    # 解析sideinfo维度
     side_info_dims = [int(dim) for dim in args.side_info_dims.split(',')]
     
-    # 计算侧面信息类别数量
+    # 计算sideinfo类别数量
     side_info_cols = ['cate', 'brand', 'shop']
     side_info_nums = [product_data[col].nunique() + 1 for col in side_info_cols]  # +1 for unknown
     
-    logger.info(f"侧面信息维度: {side_info_dims}")
-    logger.info(f"侧面信息类别数量: {side_info_nums}")
+    logger.info(f"sideinfo维度: {side_info_dims}")
+    logger.info(f"sideinfo类别数量: {side_info_nums}")
     
     # 创建流式随机游走器
     walker = StreamingWalker(
@@ -309,9 +309,9 @@ def main():
         logger.info(f"加载预训练模型: {args.load_model}")
         model.load_model(args.load_model)
     
-    # 预处理商品侧面信息
-    logger.info("预处理商品侧面信息")
-    for _, row in tqdm(product_data.iterrows(), total=len(product_data), desc="处理商品侧面信息"):
+    # 预处理商品sideinfo
+    logger.info("预处理商品sideinfo")
+    for _, row in tqdm(product_data.iterrows(), total=len(product_data), desc="处理商品sideinfo"):
         sku_id = row['sku_id']
         side_info = [row[col] for col in side_info_cols]
         model.update_side_info(sku_id, side_info)
