@@ -85,11 +85,6 @@ def train_model(rank, world_size, args):
             
             # 生成随机游走和样本对
             all_pairs = walker.generate_walks(pyg_data, args.num_walks, args.walk_length)
-            
-            # 确保FastGraphWalker生成的样本对数量与SimpleWalker类似
-            print(f"FastGraphWalker生成的样本对数量: {len(all_pairs)}")
-            if len(all_pairs) < 1000:  # 如果样本对数量异常少，打印警告
-                print("警告: 生成的样本对数量异常少，可能会影响训练效果")
         
         print(f"图构建和随机游走完成，耗时: {time.time() - start_time:.2f}秒")
         print(f"生成的样本对数量: {len(all_pairs)}")
