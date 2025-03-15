@@ -108,18 +108,8 @@ EGES模型结合了图嵌入和侧面信息，主要包括以下组件：
 7. **嵌入保存**：将训练好的嵌入向量保存为多种格式
 8. **嵌入可视化**：使用t-SNE算法将嵌入向量可视化
 
-### 分布式训练
-
-多GPU分布式训练使用PyTorch的DistributedDataParallel (DDP)框架，主要步骤如下：
-
-1. 使用`torch.multiprocessing.spawn`启动多个进程，每个进程对应一个GPU
-2. 在每个进程中，使用`torch.distributed.init_process_group`初始化进程组
-3. 使用`DistributedSampler`对数据进行分片，确保每个进程处理不同的数据
-4. 使用`DistributedDataParallel`包装模型，实现梯度同步
-5. 在训练过程中，只在主进程（rank=0）上保存模型和打印日志
 
 ## 性能优化
-
 1. **多GPU并行训练**：支持使用多个GPU进行分布式训练，提高训练速度
 2. **高效随机游走**：提供FastGraphWalker实现，使用PyTorch Geometric加速随机游走
 3. **多进程数据处理**：使用多进程并行处理数据，提高数据加载和预处理速度
@@ -132,7 +122,3 @@ EGES模型结合了图嵌入和侧面信息，主要包括以下组件：
 - [Node2Vec: Scalable Feature Learning for Networks](https://arxiv.org/abs/1607.00653)
 - [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/)
 - [PyTorch Distributed](https://pytorch.org/tutorials/intermediate/dist_tuto.html)
-
-## 许可证
-
-MIT License 
