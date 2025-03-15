@@ -1,0 +1,14 @@
+torch>=1.8.0
+torch-geometric>=2.0.0
+torch-scatter>=2.0.0
+torch-sparse>=0.6.0
+numpy>=1.19.0
+pandas>=1.1.0
+matplotlib>=3.3.0
+scikit-learn>=0.24.0
+tqdm>=4.50.0
+networkx>=2.5.0
+joblib>=1.0.0
+node2vec>=0.4.0
+gensim>=4.0.0
+tensorboard>=2.5.0 
