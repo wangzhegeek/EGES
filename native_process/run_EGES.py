@@ -10,10 +10,10 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 导入公共模块
-from common.EGES_model import EGES_Model
-from common.utils import set_seed, plot_embeddings, write_embedding, save_dict_to_file, visualize_embeddings
-from common.data_process import get_session, create_dataloader, get_graph_context_all_pairs
-from common.walker import SimpleWalker
+from native_process.EGES_model import EGES_Model
+from utils import set_seed, plot_embeddings, write_embedding, save_dict_to_file, visualize_embeddings
+from data_process import get_session, create_dataloader, get_graph_context_all_pairs
+from native_process.walker import SimpleWalker
 from tqdm import tqdm
 
 

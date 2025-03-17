@@ -77,53 +77,44 @@ class FastGraphWalker:
         
         return pyg_data, (node_map, reverse_node_map)
     
-    def generate_walks(self, pyg_data, num_walks, walk_length):
-        """
-        使用PyG的Node2Vec生成随机游走
-        
-        参数:
-        pyg_data: PyG图数据
-        num_walks: 每个节点的游走次数
-        walk_length: 每次游走的长度
-        
-        返回:
-        all_pairs: 所有样本对
-        """
+    
+    def generate_walks(self, pyg_data, num_walks, walk_length, window_size):
         print(f"生成随机游走 (p={self.p}, q={self.q})...")
         start_time = time.time()
-        
+
         # 使用PyG的Node2Vec
         model = Node2Vec(
             pyg_data.edge_index,
-            embedding_dim=64,  # 这个值不重要，因为我们只使用游走部分
+            embedding_dim=64,
             walk_length=walk_length,
-            context_size=5,  # 上下文窗口大小
-            walks_per_node=num_walks,
+            context_size=5,
+            walks_per_node=num_walks,  # 直接设置总游走次数
             p=self.p,
             q=self.q,
-            num_negative_samples=1  # 这个值不重要，因为我们自己处理负采样
+            sparse=True
         ).to(self.device)
-        
-        # 创建数据加载器
+
+        # 直接在GPU上生成游走
         loader = model.loader(batch_size=128, shuffle=True)
+        all_walks = []
         
-        # 收集所有正样本对
+        for walk_batch in tqdm(loader, desc="生成游走"):
+            pos_rw, _ = walk_batch  # 关键修正：解包元组
+            all_walks.append(pos_rw.cpu().numpy())
+
+        # 合并结果
+        all_walks = np.concatenate(all_walks, axis=0)
+        
+        # 生成上下文对（保持原有逻辑）
+        print("生成上下文对...")
         all_pairs = []
+        for walk in all_walks:
+            for i in range(len(walk)):
+                for j in range(max(0, i-window_size), min(len(walk), i+window_size+1)):
+                    if i != j:
+                        all_pairs.append((walk[i], walk[j]))
         
-        # 使用PyG的数据加载器直接获取正样本对
-        for pos_rw, neg_rw in loader:
-            # pos_rw包含正样本对，我们只需要这些
-            src = pos_rw[:, 0].cpu().numpy()
-            dst = pos_rw[:, 1].cpu().numpy()
-            
-            # 添加到所有对中
-            for s, d in zip(src, dst):
-                all_pairs.append((int(s), int(d)))
-        
-        end_time = time.time()
-        print(f"随机游走完成，耗时: {end_time - start_time:.2f}秒")
-        print(f"生成的样本对数量: {len(all_pairs)}")
-        
+        print(f"生成样本对数量: {len(all_pairs)}")
         return all_pairs
 
 
