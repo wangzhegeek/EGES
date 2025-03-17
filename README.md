@@ -1,3 +1,5 @@
+# update 2025.3 重构项目，更新到Pytorch新版本
+
 # EGES (Enhanced Graph Embedding with Side Information)
 
 这是一个基于PyTorch实现的EGES（Enhanced Graph Embedding with Side Information）模型。该模型通过结合图结构和节点的侧信息来学习更好的节点表示。
