@@ -523,7 +523,7 @@ class EGESTrainer:
         except StopIteration:
             pass
             
-    def train(self, epochs=10, batch_size=128, output_dir='./output/integrated'):
+    def train(self, epochs=10, batch_size=128, output_dir='./output/integrated', plot_loss=True):
         """
         训练模型
         
@@ -531,6 +531,7 @@ class EGESTrainer:
         epochs: 训练轮数
         batch_size: 批次大小
         output_dir: 输出目录，用于保存中间结果
+        plot_loss: 是否绘制损失曲线
         
         返回:
         model: 训练好的模型
@@ -599,8 +600,12 @@ class EGESTrainer:
         
         print("训练完成！")
         
-        # 绘制损失下降曲线
-        plot_loss_curve(epoch_losses, output_dir=output_dir)
+        # 绘制损失下降曲线（如果需要）
+        if plot_loss:
+            plot_loss_curve(epoch_losses, output_dir=output_dir)
+        
+        # 存储损失值供后续使用
+        self.epoch_losses = epoch_losses
         
         return self.model
     
