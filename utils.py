@@ -158,29 +158,47 @@ def load_dict_from_file(input_file):
 
 def plot_loss_curve(losses, output_dir='./output'):
     """
-    绘制损失下降曲线
+    Plot the loss curve
     
-    参数:
-    losses: 每个epoch的损失列表
-    output_dir: 输出目录，用于保存损失曲线图
+    Parameters:
+    losses: list of losses for each epoch
+    output_dir: output directory for saving the loss curve
     """
     try:
         plt.figure(figsize=(10, 6))
-        plt.plot(range(1, len(losses) + 1), losses, 'b-', marker='o', label='训练损失')
-        plt.title('训练过程中的损失变化')
-        plt.xlabel('轮次 (Epoch)')
-        plt.ylabel('损失 (Loss)')
+        plt.plot(range(1, len(losses) + 1), losses, 'b-', marker='o', label='Training Loss')
+        plt.title('Loss Curve')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
         plt.grid(True)
         plt.legend()
         
-        # 确保输出目录存在
+        # Ensure output directory exists
         os.makedirs(output_dir, exist_ok=True)
         
-        # 保存图片
+        # Save image
         loss_curve_path = os.path.join(output_dir, 'loss_curve.png')
         plt.savefig(loss_curve_path)
         plt.close()
         
-        print(f"损失曲线已保存到 {loss_curve_path}")
+        print(f"Loss curve saved to {loss_curve_path}")
     except Exception as e:
-        print(f"绘制损失曲线时出错: {e}")
+        print(f"Error plotting loss curve: {e}")
+
+
+def save_embeddings(embeddings, node_map, output_dir):
+    """
+    保存节点嵌入到文件
+    
+    参数:
+    embeddings: 嵌入矩阵
+    node_map: 节点映射(id -> 原始节点)
+    output_dir: 输出目录
+    """
+    # 确保输出目录存在
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # 只保存numpy格式的嵌入
+    np.save(os.path.join(output_dir, 'node_embeddings.npy'), embeddings)
+    
+    print(f"嵌入已保存到 {output_dir}")
